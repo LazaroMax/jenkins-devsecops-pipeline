@@ -239,3 +239,20 @@ Here are the steps for Pushing Image.
 8. Image details of the `buildah` from input param.
 
 9. Name of the step.
+---
+
+## Diagrama del Pipeline
+
+```mermaid
+flowchart LR
+    A[Checkout código] --> B[Build Docker Image]
+    B --> C[Trivy Security Scan]
+    C --> D{Security Gate}
+    D -->|Vulnerabilidades críticas = 0| E[Push to Registry]
+    D -->|Vulnerabilidades críticas > 0| F[Pipeline Failed]
+    E --> G[Deploy]
+```
+
+## Cross-References
+
+Este pipeline puede integrarse con la suite de pruebas E2E en [cypress-e2e-suite](https://github.com/LazaroMax/cypress-e2e-suite), ejecutando los tests de Cypress como una etapa adicional después del despliegue para validar que la aplicación funciona correctamente en el ambiente desplegado.
