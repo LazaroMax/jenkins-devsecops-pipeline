@@ -10,7 +10,7 @@ jobs:
     name: Manejo de Paquetes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Instalar dependencias
         run: |
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: package-management
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Instalar Trivy
         run: |
@@ -45,7 +45,7 @@ jobs:
           trivy fs . --severity HIGH,CRITICAL --exit-code 0
 
       - name: Subir reporte SAST
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-sast-report
           path: trivy-sast-report.json
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: sast
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Levantar app de prueba
         run: |
@@ -78,9 +78,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sast, dast]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Verificar vulnerabilidades de imagen con Trivy
+      - name: Instalar Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb generic main" | \
+            sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Verificar imagen con Trivy
         run: |
           docker pull nginx:alpine
           trivy image nginx:alpine --exit-code 0 \
